@@ -1,0 +1,26 @@
+--- /opt/lab/logs/printk.h.orig	2024-01-31 14:33:07.000000000 +0800
++++ /opt/lab/kernel/include/linux/printk.h	2026-11-08 09:38:40.316375522 +0800
+@@ -553,11 +553,23 @@
+ void panic_print_msg(struct printk_log *msg);
+ void pr_log_store_add_time(char *pr_char, u32 sizeof_pr_char, u16 *pr_len);
+ #else
++#ifdef CONFIG_ARM64
++/* [LAB-ONLY BUILD ADAPTATION] arm64 does not select CONFIG_HAVE_UNSTABLE_SCHED_CLOCK,
++ * so include/linux/sched/clock.h provides "static inline u64 local_clock()". The
++ * vendor declaration below would then make GCC 9.2 reject that static declaration
++ * ("static declaration of 'local_clock' follows non-static declaration").
++ * hisi_getcurtime() is only meaningful with CONFIG_HISI_TIME=y (which pulls in
++ * kernel/printk/common_printk.c from printk.c); with HISI_TIME=n it is unused by
++ * any driver enabled in this lab config, so provide an inert stub here.
++ */
++static inline u64 hisi_getcurtime(void) { return 0; }
++#else
+ extern u64 local_clock(void);
+ static inline u64 hisi_getcurtime(void) {
+ 	return local_clock();
+ }
+ #endif
++#endif
+ 
+ #ifdef CONFIG_HISI_BB
+ extern char *hisirdr_ex_log_buf;

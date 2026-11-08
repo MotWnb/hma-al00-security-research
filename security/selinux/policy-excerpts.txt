@@ -1,0 +1,39 @@
+# SELinux policy excerpts (plat_sepolicy.cil)
+# Line numbers are from the pulled file (2,091,772 bytes, policy vers 310).
+# Only the rules that decide a published conclusion are included.
+
+plat:25732  (allow domain exception_device (chr_file (ioctl read write getattr lock append map open)))
+plat:26935  (allowx domain exception_device (ioctl chr_file (0xab01 0xab04 0xab09)))
+plat:26936  (allowx domain exception_device (ioctl chr_file (0xad01)))
+plat:26937  (allowx domain exception_device (ioctl chr_file ((range 0xaf06 0xaf07))))
+plat:23217  (neverallowx base_typeattr_730 exception_device (ioctl chr_file ((range 0xab02 0xab03))))
+plat:26827  (neverallowx base_typeattr_730 exception_device (ioctl chr_file ((range 0xab05 0xab08))))
+plat:23329  (allowx logserver exception_device (ioctl chr_file ((range 0x0 0xffff))))
+plat:26934  (allowx logserver exception_device (ioctl chr_file ((range 0x0 0xffff))))
+
+plat:24745  (allow untrusted_app exception_device (chr_file (write lock append map open)))
+plat:24746  (allow untrusted_app_25 exception_device (chr_file (write lock append map open)))
+
+plat:28674  (allow system_server exception_device (chr_file (ioctl ...)))
+plat:28675  (allowx system_server exception_device (ioctl chr_file (0xaf01 0xaf03)))
+
+plat:25919  (allow domain dubai_log_device (chr_file (ioctl read write getattr lock append map open)))
+plat:25920  (allow domain dubai_log_device (dir (search)))
+
+# gpu_device: granted to an attribute set, not to appdomain directly
+# (base_typeattr_228, bootanim, dumpstate, hal_graphics_*, mediaserver,
+#  adbd, gpuservice, rs, surfaceflinger, system_server)
+plat:230xx  (allow base_typeattr_228 gpu_device (chr_file (ioctl read write getattr lock append map open)))
+
+# video: ordinary apps are explicitly forbidden
+(neverallow appdomain video_device (chr_file (read write)))
+
+# the futex-PI vendor gate is readable only by zygote
+(genfscon proc /sys/kernel/hw_futex_pi_enabled (u object_r proc_hw_futexpi ((s0) (s0))))
+(allow zygote proc_hw_futexpi (file (read write getattr open)))
+
+# ashmem: only targetSdk <= 27 app domains
+(allow untrusted_app_25 ashmem_device (chr_file (ioctl read write getattr lock append map open)))
+(allow untrusted_app_27 ashmem_device (chr_file (ioctl read write getattr lock append map open)))
+(allow appdomain ashmem_device (chr_file (execute)))
+(neverallow base_typeattr_573 ashmem_device (chr_file (open)))

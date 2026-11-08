@@ -1,0 +1,58 @@
+--- /opt/lab/logs/cpu_errata.c.orig	2026-11-08 10:06:23.668038509 +0800
++++ /opt/lab/kernel/arch/arm64/kernel/cpu_errata.c	2026-11-08 10:09:04.335995426 +0800
+@@ -174,14 +174,10 @@
+ 	if (!entry->matches(entry, SCOPE_LOCAL_CPU))
+ 		return 0;
+ 
+-#ifndef CONFIG_ARCH_HISI
+ 	if (psci_ops.smccc_version == SMCCC_VERSION_1_0)
+ 		return 0;
+ 
+ 	switch (psci_ops.conduit) {
+-#else
+-	switch (PSCI_CONDUIT_SMC) {
+-#endif
+ 	case PSCI_CONDUIT_HVC:
+ 		arm_smccc_1_1_hvc(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
+ 				  ARM_SMCCC_ARCH_WORKAROUND_1, &res);
+@@ -279,11 +275,7 @@
+ 
+ 	BUG_ON(nr_inst != 1);
+ 
+-#ifdef CONFIG_ARCH_HISI
+-	switch (PSCI_CONDUIT_SMC) {
+-#else
+ 	switch (psci_ops.conduit) {
+-#endif
+ 	case PSCI_CONDUIT_HVC:
+ 		insn = aarch64_insn_get_hvc_value();
+ 		break;
+@@ -322,11 +314,7 @@
+ 	}
+ #endif
+ 
+-#ifdef CONFIG_ARCH_HISI
+-	switch (PSCI_CONDUIT_SMC) {
+-#else
+ 	switch (psci_ops.conduit) {
+-#endif
+ 	case PSCI_CONDUIT_HVC:
+ 		arm_smccc_1_1_hvc(ARM_SMCCC_ARCH_WORKAROUND_2, state, NULL);
+ 		break;
+@@ -357,16 +345,12 @@
+ 	}
+ #endif
+ 
+-#ifndef CONFIG_ARCH_HISI
+ 	if (psci_ops.smccc_version == SMCCC_VERSION_1_0) {
+ 		ssbd_state = ARM64_SSBD_UNKNOWN;
+ 		return false;
+ 	}
+ 
+ 	switch (psci_ops.conduit) {
+-#else
+-	switch (PSCI_CONDUIT_SMC) {
+-#endif
+ 	case PSCI_CONDUIT_HVC:
+ 		arm_smccc_1_1_hvc(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
+ 				  ARM_SMCCC_ARCH_WORKAROUND_2, &res);

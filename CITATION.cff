@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this research, please cite it as below."
+title: "hme20-root-research: root feasibility study of a Huawei Mate 20 (HMA-AL00, Kirin 980) on HarmonyOS 4.0.0"
+abstract: >-
+  A documented negative result: no pure-software path to uid 0 was found for a fully
+  updated Huawei Mate 20 without disassembly. Includes per-CVE applicability analysis
+  against the vendor's published GPL kernel source, a SELinux ioctl-access audit, and an
+  offline QEMU ARM64 reproduction environment for CVE-2025-38352 that did not achieve a
+  use-after-free.
+authors:
+  - name: "MotWnb"
+    alias: "MotWnb"
+    website: "https://github.com/MotWnb"
+version: "1.0.0"
+date-released: "2026-11-08"
+license: "CC-BY-4.0"
+repository-code: "https://github.com/MotWnb/hma-al00-security-research"
+url: "https://github.com/MotWnb/hma-al00-security-research"
+keywords:
+  - android
+  - harmonyos
+  - kirin980
+  - linux-kernel
+  - arm64
+  - security-research
+  - cve
+  - selinux
+  - qemu
+  - reproducibility
+references:
+  - type: "generic"
+    title: "Vendor kernel source: HMA-AL00-TL00_HarmonyOS4.0.0 open source package"
+    url: "https://consumer.huawei.com/en/opensource/"

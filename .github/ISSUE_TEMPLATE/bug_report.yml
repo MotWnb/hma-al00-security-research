@@ -1,0 +1,45 @@
+name: Bug or factual error
+description: Report a wrong claim, broken step, or mis-attributed CVE
+title: "[bug] "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for checking our work. Please **do not** paste exploit code, trigger sources, or KASLR/offset material here — see SECURITY.md for that channel.
+  - type: input
+    id: file
+    attributes:
+      label: File and line
+      description: e.g. `security/cve/CVE-2025-38352.md:42`
+      placeholder: path/to/file.md:line
+    validations:
+      required: true
+  - type: textarea
+    id: claim
+    attributes:
+      label: What the repository claims
+      description: Quote the sentence or table row you believe is wrong.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence that contradicts it
+      description: Source line, log excerpt, official advisory, or a reproduction step.
+    validations:
+      required: true
+  - type: dropdown
+    id: grade
+    attributes:
+      label: Which evidence grade is affected?
+      options:
+        - SOURCE_CONFIRMED
+        - CONFIG_CONFIRMED
+        - ACCESS_CONFIRMED
+        - REPRODUCED
+        - NOT_REPRODUCED
+        - INCONCLUSIVE
+        - Not sure
+    validations:
+      required: false

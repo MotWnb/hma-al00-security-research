@@ -1,0 +1,13 @@
+--- /opt/lab/logs/drivers-Makefile.orig	2026-11-08 09:45:22.252292715 +0800
++++ /opt/lab/kernel/drivers/Makefile	2026-11-08 09:45:22.264292712 +0800
+@@ -241,7 +241,9 @@
+ 
+ obj-$(CONFIG_ICS_DRIVER) += ics_drivers/
+ 
+-obj-y += hisi_sim_adapt/
++# lab: hisi_sim_adapt is unconditional obj-y but needs CONFIG_HISI_PMIC (not a Kconfig
++# symbol in this tree) -> hisi_sub_pmic_reg_read/write undeclared. Not needed for QEMU.
++# obj-y += hisi_sim_adapt/
+ obj-$(CONFIG_HUAWEI_EMCOM) += emcom/
+ 
+ ifeq ($(BUILD_WITH_AQ), true)

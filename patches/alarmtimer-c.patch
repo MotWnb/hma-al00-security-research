@@ -1,0 +1,45 @@
+--- /opt/lab/logs/alarmtimer.c.orig	2026-11-08 09:57:20.840146409 +0800
++++ /opt/lab/kernel/kernel/time/alarmtimer.c	2026-11-08 09:58:24.056129708 +0800
+@@ -93,7 +93,9 @@
+ 		/* set current as alarm time, and turn off the irq */
+ 		rtc_time_to_tm(rtc_current_time, &poweroff_rtc_alarm.time);
+ 		poweroff_rtc_alarm.enabled = 0;
++#ifdef CONFIG_RTC_DRV_HISI_PMIC_SPMI
+ 		hisi_pmu_rtc_setalarmtime(0);
++#endif
+ 		return 0;
+ 	}
+ 	getnstimeofday(&tmp_time);
+@@ -109,7 +111,9 @@
+ 		setting_time.tm_sec,
+ 		time_sec);
+ 
++#ifdef CONFIG_RTC_DRV_HISI_PMIC_SPMI
+ 	hisi_pmu_rtc_readtime(&rtc_current_rtc_time);
++#endif
+ 	rtc_tm_to_time(&rtc_current_rtc_time, &rtc_current_time);
+ 	pr_info("%s() rtc_current_rtc_time is : [%d-%d-%d] [%d:%d:%d] %lu\n",
+ 		__func__,
+@@ -145,7 +149,9 @@
+ 		poweroff_rtc_alarm.time.tm_min,
+ 		poweroff_rtc_alarm.time.tm_sec,
+ 		alarm_value);
++#ifdef CONFIG_RTC_DRV_HISI_PMIC_SPMI
+ 	hisi_pmu_rtc_setalarmtime(alarm_value);
++#endif
+ 	return 0;
+ }
+ 
+@@ -355,10 +361,12 @@
+ 	unsigned long flags;
+ 	struct rtc_time tm;
+ 
++#ifdef CONFIG_HISI_CMDLINE_PARSE
+ 	if (hw_alarm_stop && runmode_is_factory()){
+ 		pr_err("runmode_is_factory 1, forbid alarms\n");
+ 		return 0;
+ 	}
++#endif
+ 
+ 	spin_lock_irqsave(&freezer_delta_lock, flags);
+ 	min = freezer_delta;

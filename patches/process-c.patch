@@ -1,0 +1,12 @@
+--- /opt/lab/logs/process.c.orig	2026-11-08 09:57:20.840146409 +0800
++++ /opt/lab/kernel/arch/arm64/kernel/process.c	2026-11-08 09:57:20.864146405 +0800
+@@ -172,7 +172,9 @@
+ 	 * ResetSystem().
+ 	 */
+ 	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
++#ifdef CONFIG_HISI_POWER_OFF
+ 		hisi_pm_system_reset_comm(cmd);
++#endif
+ 		efi_reboot(reboot_mode, NULL);
+ 	}
+ 

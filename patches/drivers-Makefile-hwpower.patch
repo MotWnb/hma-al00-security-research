@@ -1,0 +1,13 @@
+--- /opt/lab/logs/drivers-Makefile.orig2	2026-11-08 09:52:50.500200425 +0800
++++ /opt/lab/kernel/drivers/Makefile	2026-11-08 09:52:50.512200424 +0800
+@@ -216,7 +216,9 @@
+ obj-$(CONFIG_HUAWEI_ARMPC_PLATFORM) += huawei_armpc_platform/
+ obj-$(CONFIG_HW_FDLEAK) += hwfdleak/
+ obj-$(CONFIG_HW_GADGET) += hwusb/
+-obj-y += hwpower/
++# lab: hwpower/cc_common_module/power_i2c calls i2c_transfer but I2C is disabled for QEMU;
++# hwpower is pulled in unconditionally and has no Kconfig switch -> dropped entirely.
++# obj-y += hwpower/
+ obj-y += hwsensors/
+ obj-$(CONFIG_CONNECTIVITY_HI110X) += connectivity/
+ obj-$(CONFIG_HUAWEI_STORAGE_ROFA) += storage_rofa/

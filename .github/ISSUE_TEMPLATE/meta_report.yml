@@ -1,0 +1,33 @@
+name: Data exposure or licensing problem
+description: Report an identifier that should have been redacted, or a license/attribution issue
+title: "[meta] "
+labels: ["meta"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for **repository hygiene** only. For a security vulnerability in a Huawei product, contact Huawei PSIRT — see SECURITY.md. Do not post the sensitive value itself; describe where it is.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of problem
+      options:
+        - Data exposure (identifier, path, log)
+        - License / attribution
+        - Missing provenance
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where (file and line)
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Describe the issue without repeating any secret or personal value.
+    validations:
+      required: true

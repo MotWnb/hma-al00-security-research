@@ -1,0 +1,31 @@
+--- logs/jump_label.c.orig	2026-11-08 09:40:40.040349444 +0800
++++ kernel/kernel/jump_label.c	2026-11-08 09:40:40.040349444 +0800
+@@ -79,28 +79,6 @@
+ }
+ EXPORT_SYMBOL_GPL(static_key_count);
+ 
+-void static_key_enable(struct static_key *key)
+-{
+-	int count = static_key_count(key);
+-
+-	WARN_ON_ONCE(count < 0 || count > 1);
+-
+-	if (!count)
+-		static_key_slow_inc(key);
+-}
+-EXPORT_SYMBOL_GPL(static_key_enable);
+-
+-void static_key_disable(struct static_key *key)
+-{
+-	int count = static_key_count(key);
+-
+-	WARN_ON_ONCE(count < 0 || count > 1);
+-
+-	if (count)
+-		static_key_slow_dec(key);
+-}
+-EXPORT_SYMBOL_GPL(static_key_disable);
+-
+ void static_key_slow_inc_cpuslocked(struct static_key *key)
+ {
+ 	int v, v1;

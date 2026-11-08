@@ -1,0 +1,29 @@
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.vscode/
+.idea/
+
+# Lab build output (never commit kernels, images or logs)
+*.o
+*.ko
+*.cmd
+Image
+vmlinux
+*.cpio
+*.cpio.gz
+initramfs*
+build/
+out/
+*.log
+
+# Withheld / private research material
+trigger.c
+trigger-v2.c
+widen-window.patch
+*.orig
+*.rej
+private/

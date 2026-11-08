@@ -1,0 +1,44 @@
+{
+  "experiment": "stage-a-cve-2025-38352",
+  "environment": "qemu-arm64-virt",
+  "device": "HMA-AL00 (not used for runtime testing)",
+  "kernel": {
+    "source": "vendor HMA-AL00-TL00_HarmonyOS4.0.0 Code_Opensource/kernel",
+    "version": "4.14.116",
+    "build": "#8 SMP PREEMPT",
+    "image_bytes": 26374656,
+    "config": "KERNEL_CONFIG/lab-config-arm64-4.14.116",
+    "build_adaptations": 9,
+    "timer_code_modified": false
+  },
+  "qemu": {"version": "10.2.1", "machine": "virt", "cpu": "cortex-a72", "smp": 4, "ram_mb": 3072},
+  "boot": {"marker": "INIT_OK", "kasan_reports": 0, "panics": 0, "warnings": 0},
+  "runs": [
+    {"name": "v1-short", "wake": "blocking-poll", "tries": 1100, "fires": 612, "delete_after_reap": 186, "warn_hits": 0, "kasan": 0},
+    {"name": "v1-long", "wake": "blocking-poll", "tries": 5300, "fires": 2847, "delete_after_reap": 1000, "warn_hits": 0, "kasan": 0},
+    {"name": "v2", "wake": "signalfd-nonblock-busy", "tries": 5600, "fires": 2332, "delete_after_reap": 1531, "warn_hits": 0, "kasan": 0},
+    {"name": "v2-stats", "wake": "signalfd-nonblock-busy", "tries": 2367, "fires": 952, "delete_after_reap": 295, "attempts": 952, "ok": 952, "einval": 0, "spins": 0, "warn_hits": 0, "kasan": 0}
+  ],
+  "diagnostic_kernel": {
+    "probes": ["del-null", "run-nosighand", "run-exiting"],
+    "del_null": {"count": 40, "entry_empty": true, "firing": 0},
+    "run_nosighand": {"count": 38, "exit_state": 16, "state_name": "EXIT_DEAD"},
+    "run_exiting": {"count": 40, "exit_state": 32, "state_name": "EXIT_ZOMBIE", "firing_list_nonempty": true},
+    "rolled_back_in_published_image": true
+  },
+  "instrumented_kernels": [
+    {"variant": "widen-20ms", "insertion": "after unlock_task_sighand", "warn_hits": 0, "kasan": 0},
+    {"variant": "widen-50ms", "insertion": "after unlock_task_sighand", "warn_hits": 0, "kasan": 0},
+    {"variant": "widen-v2-50ms", "insertion": "inside loop after first cpu_timer_fire", "warn_hits": 0, "attempts": 685, "spins": 0}
+  ],
+  "verdict": "NOT_REPRODUCED",
+  "stages": {
+    "code_present": "yes",
+    "config_enabled": "yes",
+    "app_reachable": "yes",
+    "uaf_observed": "no",
+    "write_primitive": "no",
+    "uid0": "no"
+  },
+  "notes": "Trigger source and timing parameters withheld; see PRIVATE_ARCHIVE.md."
+}

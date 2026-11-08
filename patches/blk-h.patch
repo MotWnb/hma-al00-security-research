@@ -1,0 +1,11 @@
+--- /opt/lab/logs/blk.h.orig	2026-11-08 09:44:35.500302564 +0800
++++ /opt/lab/kernel/block/blk.h	2026-11-08 09:44:35.512302562 +0800
+@@ -248,7 +248,7 @@
+ 		struct elevator_queue *e)
+ {
+ 	blk_mq_sched_free_requests(q);
+-	elevator_exit(q, e);
++	__elevator_exit(q, e);
+ }
+ 
+ struct hd_struct *__disk_get_part(struct gendisk *disk, int partno);
