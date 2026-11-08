@@ -123,3 +123,14 @@ TruffleHog was requested but is **not installed** on this machine; gitleaks was 
 * `README.md` / `README.zh-CN.md` — explicit "this is not a root tool" disclaimer and a contributing section.
 * `LICENSES.md` — explanation of why no single `LICENSE` file exists.
 * `.gitignore`, `.github/ISSUE_TEMPLATE/*` — repository hygiene; issue templates route product vulnerabilities to Huawei PSIRT.
+
+---
+
+## 8. Publication record
+
+* Repository: <https://github.com/MotWnb/hma-al00-security-research>
+* Visibility: public, default branch `main`
+* Initial commit: `1ea210d` (`docs: publish HMA-AL00 root feasibility research (v1.0.0)`)
+* Published: 2026-11-08
+* `CITATION.cff` already carries the final repository URL and the `MotWnb` author identity; no follow-up metadata edit was needed beyond this record.
+* Pre-push scans: gitleaks 8.30.1 `dir` and `git` modes both reported **no leaks**; the git history contains no `trigger*`, `widen-window*`, `*.orig` or raw `*.log` paths.
