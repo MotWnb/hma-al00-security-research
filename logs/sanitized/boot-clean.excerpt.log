@@ -1,0 +1,39 @@
+# Sanitized excerpt — clean boot of the vendor 4.14.116 tree on QEMU ARM64
+# Source: /opt/lab/logs/boot-clean.log (10,355 B), 2026-11-08
+# Sanitization: no device identifiers, no host usernames; lab paths kept intentionally.
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 4.14.116 (root@<host>) (gcc version 9.2.1 20191025 (GNU Toolchain for the A-profile Architecture 9.2-2019.12 (arm-9.10))) #8 SMP PREEMPT Sun Nov 8 10:10:33 CST 2026
+[    0.000000] Boot CPU: AArch64 Processor [410fd083]
+[    0.000000] Machine model: linux,dummy-virt
+[    0.000000] efi: Getting EFI parameters from FDT:
+[    0.000000] efi: UEFI not found.
+[    0.000000] cma: Reserved 16 MiB at 0x00000000ff000000
+[    0.000000] NUMA: No NUMA configuration found
+[    0.000000] NUMA: Faking a node at [mem 0x0000000000000000-0x00000000ffffffff]
+[    0.000000] NUMA: NODE_DATA [mem 0xfefe8a00-0xfefea1bf]
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000040000000-0x00000000ffffffff]
+[    0.000000]   Normal   empty
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x00000000ffffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x00000000ffffffff]
+[    0.000000] kasan: KernelAddressSanitizer initialized
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+# ... (driver init omitted) ...
+[    3.113310] uart-pl011 9000000.pl011: no DMA platform data
+[    3.214242] Freeing unused kernel memory: 1344K
+[    3.220761] Kernel init end, jump to execute/init
+
+=== INIT START ===
+INIT_OK
+--- /proc/version ---
+Linux version 4.14.116 (root@<host>) (gcc version 9.2.1 20191025 (GNU Toolchain for the A-profile Architecture 9.2-2019.12 (arm-9.10))) #8 SMP PREEMPT Sun Nov 8 10:10:33 CST 2026
+--- end /proc/version ---
+# ...
+--- /proc/cmdline ---
+console=ttyAMA0 rdinit=/init panic=-1 loglevel=7
+=== INIT DONE, powering off ===
+[    4.284039] reboot: Power down

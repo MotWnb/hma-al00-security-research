@@ -19,6 +19,7 @@ initramfs*
 build/
 out/
 *.log
+!logs/sanitized/*.log
 
 # Withheld / private research material
 trigger.c

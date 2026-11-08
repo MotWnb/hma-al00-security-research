@@ -1,0 +1,16 @@
+# Sanitized excerpt — diagnostic kernel run (POSIX CPU timer race window)
+# Source: /opt/lab/logs/diag-run1.log (71,428 B), 2026-11-08
+# The diagnostic kernel added three pr_warn() probes and was rolled back afterwards.
+
+# PCBDBG lines total: 118
+[    4.379934] PCBDBG del-null pid=993 entry_empty=1 firing=0
+[    4.380608] PCBDBG del-null pid=993 entry_empty=1 firing=0
+[    4.380859] PCBDBG del-null pid=993 entry_empty=1 firing=0
+[    4.380971] PCBDBG del-null pid=993 entry_empty=1 firing=0
+[    4.381069] PCBDBG del-null pid=993 entry_empty=1 firing=0
+# ...
+[  110.442694] PCBDBG run-nosighand pid=14367 exit_state=16
+[  112.315807] PCBDBG run-nosighand pid=14646 exit_state=16
+[  114.066663] PCBDBG run-nosighand pid=14877 exit_state=16
+
+[    4.037048] registered taskstats version 1
