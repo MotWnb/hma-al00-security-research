@@ -28,6 +28,15 @@
 
 真机数据、QEMU 数据、诊断内核数据、插桩内核数据**始终分开标注**。**代码存在 ≠ 利用成功**；**临时提权 ≠ 完整 Root**。
 
+> **项目状态（v1.1.0）**
+>
+> ```
+> RESEARCH_STATUS: PAUSED
+> ROOT_STATUS:     NOT_ACHIEVED
+> LAST_REVIEWED:   2026-11-15
+> ```
+>
+> 已完成：Bootloader 与启动链审计、内核与驱动审计（含厂商官方 4.14.116 源码）、SELinux 权限边界分析、十余项 CVE 适用性核查、QEMU ARM64 内核实验环境、POSIX CPU Timers 离线实验、华为 Maple AOT Framework 分析。暂停状态表示"纯软件路径已穷尽"，不代表没有未解问题——刻意保留的 `UNKNOWN` 项见 [TODO.md](TODO.md)。
 ## 2. 研究对象
 
 | 项目 | 值 |
@@ -71,6 +80,10 @@
 | `CVE-2024-53104`（uvcvideo 越界写） | `SOURCE_CONFIRMED` | 修复缺失，但需恶意 USB 视频设备 + camera 域进程；普通 App 打不开 `/dev/video*` |
 | `CVE-2025-1246`（Mali **用户态**驱动越界） | `CONFIG_CONFIRMED`（版本命中 r18p0-01rel0） | 用户态缺陷，无内核写原语，不构成 Root 路径 |
 | 华为框架 CVE（2023-52719、2024-36500、2024-56449、2025-31170） | `INCONCLUSIVE` | 真实公告，但**无公开技术细节与 PoC**，无法作为入口 |
+| `CVE-2026-45528`（`StorageManagerService.getManageSpaceActivityIntent`） | `NOT_APPLICABLE` | 方法自 Android 13 才引入；Android 10 基线与设备二进制均无。`COMPONENT_PRESENT`（`mount` binder），`CODE_PRESENT` 未发现 |
+| `CVE-2026-0065`（`BackgroundLaunchProcessController`） | 类级 `NOT_APPLICABLE`，等价逻辑 `UNKNOWN` | 类于 Android 12 引入；AOSP 10 与设备二进制均无类名。`libmapleservices.so` 中有方法名字符串，但未确认等价实现 |
+| `CVE-2026-28614`（`SlicePermissionActivity.onCreate`） | `NOT_APPLICABLE` | AOSP Settings 类在 13–16/main 与设备 `Settings.apk` 中均不存在；设备带的是 AndroidX 版本，且其 Activity 非导出 |
+| Maple AOT Framework（`libmapleservices.so`、`libmapleframework.so`） | `REPRODUCED`（结构） | `services.jar` 仅 183 B，服务端代码为原生实现；ODEX/VDEX 字符串检索在此**会假阴性**——见 [RESEARCH.md §10](RESEARCH.md) |
 
 ### 3.3 唯一的内核实验成果
 
@@ -112,6 +125,8 @@ sudo apt-get install -y qemu-system-arm bc bison flex libssl-dev libelf-dev cpio
 
 ```
 README.md / README.zh-CN.md   总览（英文 / 中文）
+TODO.md                       当前状态、路线表、未决 UNKNOWN 项
+EXECUTION_LOG.md             脱敏执行记录与每轮判定
 RESEARCH.md                   完整技术研究，含全部分轮与证据分级
 DEVICE_INFO.md                脱敏设备档案与攻击面地图
 SOURCE_PROVENANCE.md          厂商源码来源、SHA-256、许可

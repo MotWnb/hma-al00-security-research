@@ -15,6 +15,15 @@ The short answer is **no**: no pure-software path to `uid=0` was found, and the 
 > **This is not a root tool, and it does not contain one.**
 > There is no exploit, no privilege-escalation payload and no flashing procedure in this repository. The most promising candidate, **CVE-2025-38352, was *not* successfully exploited on a real device** — the offline QEMU reproduction is recorded as `NOT_REPRODUCED` (5,500+ attempts, zero `WARN_ON_ONCE`, zero KASAN hits). Everything here is analysis, negative results, and a reproducible lab. If you are looking for a way to root this phone: there is currently no public software-only method, and this repository does not change that.
 
+> **Project status (v1.1.0)**
+>
+> ```
+> RESEARCH_STATUS: PAUSED
+> ROOT_STATUS:     NOT_ACHIEVED
+> LAST_REVIEWED:   2026-11-15
+> ```
+>
+> Completed so far: bootloader and boot-chain audit; kernel and driver audit (including the vendor's own 4.14.116 source); SELinux boundary analysis; applicability checks for a dozen CVEs; a QEMU ARM64 kernel lab; an offline POSIX-CPU-timer experiment; and analysis of Huawei's Maple AOT framework. The paused state reflects the absence of any remaining *software-only* route, not the absence of open questions — see [TODO.md](TODO.md) for the deliberately unresolved (`UNKNOWN`) items.
 Every claim below carries one of these grades:
 
 | Grade | Meaning |
@@ -46,6 +55,10 @@ Full sanitized details: [DEVICE_INFO.md](DEVICE_INFO.md).
 
 ## 3. Main findings
 
+### 3.0 The Maple AOT caveat
+
+HarmonyOS 4 compiles parts of the Java framework — including system services — to native code with Huawei's Maple AOT compiler. On this device `/system/framework/services.jar` is a 183-byte stub and there is no `services.odex`; the implementations live in `/system/lib64/libmapleservices.so` (37,359,880 B) and `libmapleframework.so` (87,774,536 B). Any framework-CVE triage on such a build must therefore start from the native libraries: absence of a class in `oat/` or in `services.jar` is **not** evidence of absence. The limits of this analysis are stated in [RESEARCH.md §10.2–10.3](RESEARCH.md).
+
 ### 3.1 Bootloader / root
 
 | Route | Verdict | Evidence |
@@ -72,6 +85,10 @@ Full sanitized details: [DEVICE_INFO.md](DEVICE_INFO.md).
 | `CVE-2025-1246` (Mali **userspace** driver OOB) | `CONFIG_CONFIRMED` (version match: r18p0-01rel0) | A userspace-driver bug; no kernel write primitive, therefore not a root path |
 | HDB (`hdbd`) | `REPRODUCED` | Runs as `u:r:adbd:s0`, uid `shell(2000)` — same privilege as ADB, no root |
 | Huawei framework CVEs (2023-52719, 2024-36500, 2024-56449, 2025-31170) | `INCONCLUSIVE` | Real Huawei PSIRT advisories, but **no public technical detail or PoC**; not usable as an entry point |
+| `CVE-2026-45528` (`StorageManagerService.getManageSpaceActivityIntent`) | `NOT_APPLICABLE` | Method first appears in Android 13; absent from the Android 10 base and from device binaries. `COMPONENT_PRESENT` (`mount` binder), `CODE_PRESENT` not found |
+| `CVE-2026-0065` (`BackgroundLaunchProcessController`) | Class `NOT_APPLICABLE`, logic `UNKNOWN` | Class introduced in Android 12; absent from AOSP 10 and from device binaries. Method-name strings exist in `libmapleservices.so`, but no equivalent implementation was confirmed |
+| `CVE-2026-28614` (`SlicePermissionActivity.onCreate`) | `NOT_APPLICABLE` | AOSP Settings class absent (branches 13–16/main and device `Settings.apk`); the device ships the AndroidX variant, whose activity is non-exported |
+| Maple AOT framework (`libmapleservices.so`, `libmapleframework.so`) | `REPRODUCED` (structure) | `services.jar` is a 183-byte stub; server code is native. ODEX/VDEX string searches give **false negatives** here — see [RESEARCH.md §10](RESEARCH.md) |
 
 ### 3.3 The one real kernel-lab result
 
@@ -121,6 +138,8 @@ The lab build required nine small adaptations to make the **vendor tree** compil
 
 ```
 README.md / README.zh-CN.md   Overview (EN / ZH)
+TODO.md                       Status, route table, open UNKNOWN items
+EXECUTION_LOG.md             Sanitized chronology of experiments and verdicts
 RESEARCH.md                   Full technical research, all rounds, with evidence grades
 DEVICE_INFO.md                Sanitized device inventory and attack-surface map
 SOURCE_PROVENANCE.md          Where the vendor source came from; SHA-256; licensing

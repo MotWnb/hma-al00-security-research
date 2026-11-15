@@ -229,7 +229,89 @@ Verdict: the vulnerability is present in the shipped source; a reliable reproduc
 3. A public **ARM64 4.14** chain for GhostLock or CVE-2025-38352 appears, including a KASLR leak that works with `CFI_CLANG` and without KPTI.
 4. A framework-level (Binder/AMS/PMS) bug with a described root primitive is published — currently all four Huawei CVEs are text-only advisories.
 
-## 8. References
+## 9. Framework audit (2026-11-15): three 2026 CVEs
+
+### 9.1 A structural finding that changes how the framework must be read
+
+Before judging any framework CVE on this device, one fact has to be established: **the server-side Java code is not shipped as DEX**.
+
+* `/system/framework/services.jar` is **183 bytes** (only `META-INF/MANIFEST.MF`).
+* `/system/framework/oat/arm64/` contains **no `services.odex`**; its 85 entries are at most 123,880 bytes.
+* `/system/framework/boot-zframework.z.vdex` is 15,505,108 bytes, header `vdex021`, `number_of_dex_files=2`, `dex_size=0x5450` (**21,584 bytes**) — the DEX payload is negligible.
+* The actual implementations live in Huawei's **Maple AOT** native libraries: `/system/lib64/libmapleservices.so` (37,359,880 B) and `/system/lib64/libmapleframework.so` (87,774,536 B).
+
+Consequences: a string search over ODEX/VDEX/JAR **cannot** establish absence of a framework method on this build. Runtime component presence must be checked separately — `service list` reports `mount: [android.os.storage.IStorageManager]`, so the StorageManager service itself is present (`COMPONENT_PRESENT`).
+
+### 9.2 CVE-2026-45528 — `StorageManagerService.getManageSpaceActivityIntent`
+
+| Item | Result |
+|---|---|
+| AOSP 10.0.0_r47 `StorageManagerService.java` | Method **absent** (file is 152,164 B at `services/core/java/com/android/server/StorageManagerService.java`) |
+| Introduction point | Present from **Android 13** (`android-13.0.0_r1`, `android-14.0.0_r1`; `main` line 3530) |
+| Device base | `QP1A.190711.020` (API 29) |
+| Device binary strings | `StorageManagerService` 0, `getManageSpaceActivityIntent` 0, `getManageSpace` 0 across `/system`, `/system_ext`, `/vendor`, `/product` (>100 KB files) |
+| Grade | `COMPONENT_PRESENT`; `CODE_PRESENT` = not found; verdict **`NOT_APPLICABLE`** (medium-high confidence) |
+
+Residual uncertainty: Maple output may strip or rewrite Java method names. The 37 MB library was not disassembled; a vendor backport cannot be excluded with 100 % certainty.
+
+### 9.3 CVE-2026-0065 — `BackgroundLaunchProcessController.areBackgroundActivityStartsAllowed`
+
+| Item | Result |
+|---|---|
+| Class introduction | **Android 12**; AOSP 10 `services/core/java/com/android/server/wm/` (151 files) has **no** `Background*` class |
+| Device binary strings | `BackgroundLaunchProcessController` 0; `areBackgroundActivityStartsAllowed` 2 hits and `BackgroundActivityStart` 6 hits in `libmapleservices.so` |
+| Grade | Class level **`NOT_APPLICABLE`**; whether an equivalent, bypassable check exists = **`UNKNOWN`** |
+
+The two string hits show Huawei has its own background-activity-start logic, but they do not prove the Android 12 class (or a backport of it) is present.
+
+### 9.4 CVE-2026-28614 — `SlicePermissionActivity.onCreate`
+
+* The AOSP Settings class `com.android.settings.slices.SlicePermissionActivity` was not found in the enumerable branches `android-13.0.0_r1`, `android-14.0.0_r1`, `android-15.0.0_r1`, `android-16.0.0_r1`, `main`, and it is **not** in the device's `Settings.apk`.
+* The device does ship an AndroidX class of the same short name: `androidx.slice.compat.SlicePermissionActivity` (in `classes73.dex` of `Settings.apk`). Decompiled `onCreate` reads `EXTRA_BIND_URI`, `EXTRA_PKG` and `EXTRA_PROVIDER_PKG` from the intent, and on "allow" calls `SliceProviderCompat.grantSlicePermission(this, getPackageName(), mCallingPkg, uri)` — it does **not** verify the real caller, which is the shape of a confused deputy.
+* It is nevertheless not reachable by other apps: in `AndroidManifest.xml` (line 9436) the activity has **no intent-filter** and `excludeFromRecents=true`, so under API 29 rules `exported=false`.
+* Grade: target class **`NOT_APPLICABLE`**; the AndroidX grant path is recorded as an **independent observation**, not as this CVE.
+
+### 9.5 Combined verdict
+
+None of the three CVEs has `CODE_PRESENT` or `ACCESS_CONFIRMED` on this device, and none yields a "normal app → system privilege" path. The dominant uncertainty is Maple AOT; resolving it would require disassembling tens of megabytes of vendor native code for a bug class that postdates the device base by three Android generations.
+
+### 9.6 balong_modem.ko differential — assessment only
+
+`/vendor/modem/modem_driver/balong_modem.ko` (11,721,784 B, SHA-256 `BACAAE2042EAF7A615185DB51E74E2443027525A376E98FD99CAFC5D13199`) exposes `misc_register` ×2, `copy_from_user` ×4, `copy_to_user` ×5 and 35 `ioctl` strings; `sw.ko` (192,240 B) has no ioctl/copy surface. CVE-2026-34854/34855 are rated `AV:L/AC:H/PR:H` — they require existing high privilege and cannot serve as an initial escalation step. A meaningful differential would need a newer HMA-AL00 firmware (existence unconfirmed) plus disassembly of an 11.7 MB stripped module. Recommendation: **not a root route**; completeness-only, and only if an update package becomes available.
+
+## 10. Maple AOT: what it is and why it breaks naive analysis
+
+### 10.1 Layout observed on this device
+
+| Path | Size | Role |
+|---|---|---|
+| `/system/framework/services.jar` | 183 B | Stub; manifest only |
+| `/system/lib64/libmapleservices.so` | 37,359,880 B | Maple-compiled server-side implementations |
+| `/system/lib64/libmapleframework.so` | 87,774,536 B | Maple-compiled framework implementations |
+| `/system/framework/boot-zframework.z.vdex` | 15,505,108 B | `vdex021`; DEX payload 21,584 B (mostly verifier metadata) |
+| `/system/framework/oat/arm64/*.odex` | ≤123,880 B each | Thin/skeleton artifacts for non-server libraries |
+
+Maple is Huawei's ahead-of-time translator that lowers Java bytecode to native code for HarmonyOS. On this build it is applied to core services, so the usual Android artefacts (`services.dex`, `services.odex`, `services.vdex`) are absent or empty.
+
+### 10.2 Why ODEX/VDEX string searches mislead
+
+1. The DEX string pool for server classes is not on disk in an extractable form; only native code and a small metadata payload remain.
+2. Java method names are not guaranteed to survive: they may be inlined, deduplicated, or omitted together with reflection metadata.
+3. Conversely, the presence of a method-name string in a `.so` does not prove an equivalent implementation — it may be a log format, a property name, or a different class.
+
+### 10.3 Analysis method used here (and its limits)
+
+* Establish **component presence** from runtime facts (`service list`, binder interfaces) rather than from files.
+* Use AOSP history to establish **when code was introduced** (`android-10.0.0_r47` → `android-13/14` → `main`); a method that first appears after the device base is a strong *not-applicable* signal, though not proof against a vendor backport.
+* Treat `.so` string hits as **leads**, not findings.
+* For framework classes still shipped as DEX (e.g. `Settings.apk`), decompile and read the bytecode (jadx 1.5.0; `--single-class` keeps output small).
+* Limits: no symbol table or debug info in the Maple libraries, aggressive inlining, and no public description of Maple's metadata. Full confirmation would need disassembly (Ghidra/IDA) plus cross-version differential analysis; that is out of proportion for this project.
+
+### 10.4 Implication for future audits of HarmonyOS 3/4 devices
+
+Any framework-CVE triage on these builds must start from the native libraries, not from ODEX/VDEX. Absence of a class in `/system/framework/oat/` and in `services.jar` is **not** evidence of absence. This is the single most reusable lesson from this round.
+
+## 11. References
 
 * Huawei open-source portal — `HMA-AL00-TL00_HarmonyOS4.0.0` (see [SOURCE_PROVENANCE](SOURCE_PROVENANCE.md)).
 * XDA: permanent bootloader unlock for Kirin 710/710F/970/980 — `xdaforums.com/t/…4768171/`.

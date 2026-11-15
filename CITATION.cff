@@ -6,13 +6,14 @@ abstract: >-
   updated Huawei Mate 20 without disassembly. Includes per-CVE applicability analysis
   against the vendor's published GPL kernel source, a SELinux ioctl-access audit, and an
   offline QEMU ARM64 reproduction environment for CVE-2025-38352 that did not achieve a
-  use-after-free.
+  use-after-free, plus a framework audit of three 2026 CVEs and an analysis of Huawei's
+  Maple AOT compilation of system services.
 authors:
   - name: "MotWnb"
     alias: "MotWnb"
     website: "https://github.com/MotWnb"
-version: "1.0.0"
-date-released: "2026-11-08"
+version: "1.1.0"
+date-released: "2026-11-15"
 license: "CC-BY-4.0"
 repository-code: "https://github.com/MotWnb/hma-al00-security-research"
 url: "https://github.com/MotWnb/hma-al00-security-research"
